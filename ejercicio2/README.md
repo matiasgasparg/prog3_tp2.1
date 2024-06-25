@@ -12,7 +12,8 @@ En este ejercicio se solicita completar la implementación de la página de **re
 Para completar la implementación, se solicita realizar las siguientes tareas:
 
 1. Definir una clase `Customer` en el archivo `reservations.js` que permita representar un cliente.
-    - La clase debe tener las siguientes propiedades:
+    - La clase debe tener las sigu3
+    2x1 _:ientes propiedades:
         - `id`: Identificador del cliente.
         - `name`: Nombre del cliente.
         - `email`: Correo electrónico del cliente.
