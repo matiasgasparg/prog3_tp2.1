@@ -6,13 +6,70 @@ class Currency {
 }
 
 class CurrencyConverter {
-    constructor() {}
+    constructor(apiUrl) {
+        this.apiUrl = apiUrl;
+        this.currencies = [];
+    }
 
-    getCurrencies(apiUrl) {}
+    async getCurrencies() {
+        try {
+            const response = await fetch(`${this.apiUrl}/currencies`);
+            const data = await response.json();
+            this.currencies = Object.keys(data).map(key => new Currency(key, data[key]));
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
 
-    convertCurrency(amount, fromCurrency, toCurrency) {}
+    async convertCurrency(amount, fromCurrency, toCurrency) {
+        try {
+            if (fromCurrency.code === toCurrency.code) {
+                return parseFloat(amount);
+            }
+
+            const response = await fetch(`${this.apiUrl}/latest?amount=${amount}&from=${fromCurrency.code}&to=${toCurrency.code}`);
+            const data = await response.json();
+            return data.rates[toCurrency.code] * amount;
+        } catch (error) {
+            console.error('Error:', error);
+            return null;
+        }
+    }
+
+    async getExchangeRate(date) {
+        try {
+            const response = await fetch(`${this.apiUrl}/${date}`);
+            const data = await response.json();
+            return data.rates;
+        } catch (error) {
+            console.error('Error:', error);
+            return null;
+        }
+    }
+
+    async getRateDifference() {
+        try {
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+            const todayRates = await this.getExchangeRate(today.toISOString().split('T')[0]);
+            const yesterdayRates = await this.getExchangeRate(yesterday.toISOString().split('T')[0]);
+
+            if (!todayRates || !yesterdayRates) {
+                return null;
+            }
+
+            const baseCurrency = 'USD'; // Assuming base currency is USD for simplicity
+            const rateToday = todayRates[baseCurrency];
+            const rateYesterday = yesterdayRates[baseCurrency];
+
+            return rateToday - rateYesterday;
+        } catch (error) {
+            console.error('Error:', error);
+            return null;
+        }
+    }
 }
-
 document.addEventListener("DOMContentLoaded", async () => {
     const form = document.getElementById("conversion-form");
     const resultDiv = document.getElementById("result");
